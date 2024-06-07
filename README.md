@@ -11,4 +11,20 @@ Requirements
 - Django
 - OpenCV
 ## Installation
-- Clone this repository:
+1. Clone this repository:
+  ```
+git clone https://github.com/EstebanExplorer/Django-streaming.git
+```
+2. Navigate to the project directory:
+ ```
+cd Django-streaming
+```
+3. Install the dependencies:
+```
+pip install -r requirements.txt
+```
+4. Run the Django application:
+ ```
+python manage.py runserver
+```
+5. Open your browser and go to http://127.0.0.1:8000/ to view the real-time video stream.
