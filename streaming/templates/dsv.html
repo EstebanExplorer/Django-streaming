@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block content %}
+
+<script type="text/javascript">
+function loadCanvas(id) {
+ n_cam = {{ streaming_setting.num_cam }};
+  lt_cam = n_cam;
+
+
+  item_cam = [
+  "{{ streaming_setting.cam1 }}",
+  "{{ streaming_setting.cam2 }}",
+  "{{ streaming_setting.cam3 }}",
+  "{{ streaming_setting.cam4 }}",
+
+  ];
+
+  var canvasW = 572;
+  var canvasH = 430;
+  var canvasN = 1;
+  if (lt_cam ===1) {
+    canvasW = 696;
+  }
+
+  if (n_cam ==1 && n_cam <4 ) {
+    canvasN = 1
+    n_cam = 1
+  }
+
+  else if (n_cam >=1 && n_cam <=4 ) {
+    canvasN = 2
+    n_cam = 4
+  }
+  else if (n_cam > 4 && n_cam <=9) {
+    canvasN = 3
+    n_cam = 9 
+  }
+  else if (n_cam > 9 && n_cam <=16) {
+    canvasN = 4
+    n_cam = 16
+  }
+
+  d = canvasW % canvasN,
+  r = canvasH % canvasN,
+  v = (canvasW - d - 2 * canvasN) / canvasN,
+  c = (canvasH - r - 2 * canvasN) / canvasN,
+  o = canvasN;
+
+  if (n_cam===1){
+    size_canvas = 100;
+  }
+  if (n_cam===4){
+    size_canvas = 50;
+  }
+  if (n_cam===9){
+    size_canvas = 33.3333333333;
+  }
+  if (n_cam===16){
+    size_canvas = 25;
+  }
+
+  i = 1
+  while(i <=n_cam){
+    w = v + (i % o === o - 1 ? d : 0), h = c + (i + o >= Math.pow(o) ? r : 0);
+    var canvas = document.createElement('canvas');
+    div = document.getElementById(id); 
+    canvas.id     ="canvas"+i;
+    canvas.width  = w;
+    canvas.height = h;
+    canvas.style.border = "0.7px solid #e3e4e5";
+    div.appendChild(canvas)
+
+    i = i+1
+    }
+
+    i = 1
+  while(i <=n_cam){
+    document.getElementById("canvas"+i).style.width = ""+size_canvas+"%";
+    i = i+1
+    }
+
+
+}
+</script>
+
+<div class="row">
+  <div class="row justify-content-center">
+
+<div class="col-sm-7  margencctv mt-3 ">
+
+
+<div id="cctv" class="border mx-3 bg-dark"></div>
+<script type="text/javascript">
+    loadCanvas("cctv");
+</script>
+
+<div class="text-center my-3">
+<input type='button' value='Start' id='on_off' class="btn btn-lg btn-primary btn-block py-2 px-4">
+</div>
+
+
+
+
+</div>
+<div class="col-sm-3 mt-3">
+
+<div id="img_gd">
+<img src="{% static 'img/search.svg' %}" class="img-thumbnail" alt="..."  width="250" height="150" /> 
+</div>
+
+
+        
+  <div id="choise_estado" class="mt-4">
+        <p><b><span class="btn-info bg-info px-3 py-2">Off</span></b></p>
+      </div>
+
+  <div class="configurarCamara mt-5">
+  
+  <a class="btn btn-lg btn-primary btn-block" role="button" data-bs-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+ Setting
+</a>
+
+</div>
+
+
+<div class="collapse" id="collapseExample" >
+
+  <div class="well">
+
+    <form class="form-horizontal" method="post"> 
+
+       {% csrf_token %}
+       {% if success %}
+       <p>Datos actualizados corectamente</p>
+       {% endif %}
+       <select id="num_cam" name="num_cam" class="form-select form-select-lg mb-3 mt-3" aria-label="Large select example">
+  <option selected disabled>Select number of cameras</option>
+  <option value="1" selected>One</option>
+  <option value="2">Two</option>
+  <option value="3">Three</option>
+  <option value="4">Four</option>
+</select>
+
+
+    <div id="newCamara" class="my-3"></div>
+  <button type="submit" class="btn btn-primary">Add camera</button>
+  
+
+  </form>
+      </div>
+      
+</div>    
+  
+</div>
+
+  </div>
+</div>
+
+    <script>
+     
+(function () {
+  var Start = false;
+  var intervalo;
+  var lienzo = [];
+  var img_url = [];
+  var img_cv = [];
+  var ctx = [];
+
+var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+var controlsock = new WebSocket (ws_scheme + '://' + window.location.host + "/ws/" );
+
+  i = 1
+  while(i<=lt_cam){
+    var newCamara = document.getElementById("newCamara");
+    var element = document.createElement("input");
+    element.type="text";
+    var valueIput = item_cam[i-1];
+    if (valueIput === "None") {
+      valueIput = ""
+    }
+    element.value=valueIput;
+    element.name="cam"+i;
+    element.id="id_cam"+i;
+    element.classList.add("form-control", "form-control-lg");
+    element.placeholder="Enter Camera "+i;
+    document.getElementById("newCamara").appendChild(element);
+    valorid = document.getElementById("id_cam"+i).value;
+    if (valorid ==='') {
+      i = i+1
+      continue;
+    }
+    lienzo.push (document.getElementById('canvas'+i));
+    img_url.push ("/streaming/cam"+i);
+    ctx[i-1] = lienzo[i-1].getContext('2d');
+    img_cv[i-1] = new Image();
+    i = i+1
+  }
+
+  function init(){
+
+  
+    document.getElementById('on_off').addEventListener('click',function(){
+      if(Start){
+        this.value = 'Start';
+        window.clearInterval(intervalo);
+        Start = false;
+      }
+      else{
+        this.value = 'Stop';
+        for (i = 0; i < img_url.length; i++) {
+          img_cv[i].src= img_url[i]+"?" + new Date().getTime();
+        }
+        intervalo = window.setInterval(function(){
+        for (i = 0; i < img_url.length; i++) { 
+          frame(i);
+        }
+
+        }, 20);
+        Start=true;
+      }
+    });
+
+  }
+
+  function frame(n){
+    lienzo[n].width = lienzo[n].width;
+    ctx[n].drawImage(img_cv[n], 0, 0,lienzo[n].width,lienzo[n].height);
+  };
+
+
+window.addEventListener('load',init,false);
+const choiseEstadoElement = document.getElementById('choise_estado');
+
+   controlsock.onopen = function() {
+    controlsock.send(JSON.stringify({
+      "CMD":'IN'
+    })); 
+    };
+    controlsock.binaryType = "arraybuffer";
+
+    
+    controlsock.onmessage = function(message) {
+      // Obtén el valor del elemento 'on_off'
+      const lt_in = document.getElementById("on_off").value;
+      var data  = JSON.parse(message.data);
+
+      switch (data['CMD']) {
+      case 'IN':
+        if (lt_in === "Start") {
+          choiseEstadoElement.innerHTML = '<p><b><span class="text-white bg-primary px-3 py-2">On</span></b></p>';
+        }
+        break;
+      case 'ORD':
+          choiseEstadoElement.innerHTML = '<p><b><span class="text-white bg-success px-3 py-2">Running</span></b></p>';
+          break;
+      case 'DT':
+          choiseEstadoElement.innerHTML = '<p><b><span class="text-white bg-warning px-3 py-2">Pause</span></b></p>';
+          break;
+      case 'IMG':
+          const img_deco = data['img'];
+          update_img(img_deco);
+          break;
+      default:
+          console.log('Comando no reconocido:', data['CMD']);
+  }
+    };
+
+    document.getElementById('on_off').addEventListener('click',function(){
+  var order = this.value
+  controlsock.send(JSON.stringify({
+      "CMD":'ORD',
+      "orden": order
+    })); 
+ });
+
+
+
+window.onbeforeunload = confirmExit;
+function confirmExit(){
+  apa = document.getElementById('on_off').value
+  if (apa!='Start'){
+    document.getElementById('on_off').click()
+  }
+  return 
+}
+
+ function update_img(img_deco,) {
+  document.getElementById('img_gd').innerHTML="<img src='"+img_deco+"' width='100%' height='167'/>";
+}
+
+document.getElementById('num_cam').value = {{ streaming_setting.num_cam }};
+
+})();
+
+
+
+
+
+
+
+
+    </script>
+
+{% endblock %}
+

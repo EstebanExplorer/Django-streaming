@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+
+
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="text-center mt-3">
+    <h1 class="text-secondary-emphasis">Log in</h1>
+</div>
+<div class="my-4 d-flex justify-content-center">
+    <div class="card" style="width: 18rem;">
+  <ul class="list-group list-group-flush">
+    <li class="list-group-item"><b>User:</b>  test</li>
+    <li class="list-group-item"><b>Password:</b> dsvtest#</li>
+    
+  </ul>
+</div>
+</div>
+
+<div class="col-sm-6"> 
+        <form method="post" action="." class="lg:w-1/4 px-4 mx-auto">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label class="text-secondary-emphasis form-label">Username</label>
+
+        <input type="text" name="username" class="form-control">
+    </div>
+
+    <div class="mb-3">
+        <label class="text-secondary-emphasis form-label">Password</label>
+
+        <input type="password" name="password" class="form-control">
+    </div>
+
+    {% if form.errors %}
+        {% for field in form %}
+            {% for error in field.errors %} 
+                <div class="mb-5 p-4 rounded-xl bg-red-300 text-white">
+                    <p>{{ error|escape }}</p>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+    <button class="btn btn-primary px-5  text-white fw-bold">Log in</button>
+</form>
+  </div>      
+    </div>
+    
+</div>
+
+
+
+{% endblock %}
