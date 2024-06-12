@@ -90,7 +90,6 @@ async def get_frame(video, channel_name):
     margin = 5
     height, width = frame.shape[:2]
 
-
     for (x,y,w,h) in cars: 
         cv2.rectangle(frame,(x,y),(x+w,y+h),(0,0,255),2)
 
@@ -140,14 +139,14 @@ async def video_stream(camera_url, channel_name):
 async def streaming_camera(request, camera_number):
     try:
         data = await sync_to_async(lambda: request.user.streaming_settings.order_by('-id').first())()
-        camera_url = os.path.join(baseDir, 'videos/cam2.mp4')
+        camera_url = os.path.join(baseDir, 'videos/cam6.mp4')
         camera_dict = {
         1: data.cam1,
         2: data.cam2,
         3: data.cam3,
         4: data.cam4
         }
-        camera_url = camera_dict.get(camera_number, camera_url) or camera_url
+        #camera_url = camera_dict.get(camera_number, camera_url) or camera_url
         channel_name = data.channel_name
     
         return StreamingHttpResponse(video_stream(camera_url, channel_name), content_type='multipart/x-mixed-replace; boundary=frame')

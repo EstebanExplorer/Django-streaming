@@ -33,7 +33,6 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'streaming',
-    'accounts',
 
     #terceros
     "daphne",
@@ -83,6 +82,8 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
            'hosts': [('localhost', 6379)],
+          
+            "capacity": 500,
             
         },
        
