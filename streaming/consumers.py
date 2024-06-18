@@ -22,7 +22,6 @@ def update_channel(channel_name, start):
 
 class ConnectSignal(AsyncJsonWebsocketConsumer):
     async def connect(self):
-        self.room_group_name = 'HolaLola'
         user = self.scope["user"]
         await save_channel(user, self.channel_name)
     
