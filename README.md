@@ -33,6 +33,11 @@ python manage.py runserver
 Real-Time Viewing: The application allows you to view the live video directly in your browser.
 Extensible: You can modify the code to add additional video processing features using OpenCV.
 
+<img src="https://github.com/EstebanExplorer/Django-streaming/blob/master/dsv.gif" />
+
+## important
+To run your own tests comment uncomment line 150 in views - streaming
+
 ## Contributions
 Contributions are welcome. If you have ideas to improve this application or have found any bugs, feel free to open an issue or submit a pull request.
 
