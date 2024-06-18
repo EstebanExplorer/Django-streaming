@@ -25,11 +25,7 @@ class ConnectSignal(AsyncJsonWebsocketConsumer):
         self.room_group_name = 'HolaLola'
         user = self.scope["user"]
         await save_channel(user, self.channel_name)
-        await self.channel_layer.group_add(
-                    self.room_group_name,
-                    self.channel_name
-                    )
-        
+    
         await self.accept()
       
    
